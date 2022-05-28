@@ -1,0 +1,20 @@
+{
+  "name": "google_meet_auto_join",
+  "version": "1.0.0",
+  "description": "you can use",
+  "main": "main.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.22.2"
+  },
+  "dependencies": {
+    "@types/node-schedule": "^2.1.0",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "node-schedule": "^2.1.0",
+    "sleep-promise": "^9.1.0"
+  }
+}
