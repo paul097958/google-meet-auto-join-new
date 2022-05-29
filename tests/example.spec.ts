@@ -1,61 +1,87 @@
 import fs from 'fs'
 import path from 'path'
-import { test, chromium } from '@playwright/test';
+import { test, chromium, expect } from '@playwright/test';
+import type { Page } from '@playwright/test'
 import schedule from 'node-schedule'
 import sleep from 'sleep-promise';
 import scheduleFile from '../schedule.json';
 require('dotenv').config();
+const OPEN_TIME = Number(process.env.OPEN_TIME) || 480*60*1000
 chromium.launch({
   args: [
     "--use-fake-device-for-media-stream",
-    `--use-file-for-fake-video-capture=${path.resolve('./video/device.mjpeg')}`
+    `--use-file-for-fake-video-capture=${path.resolve('./resource/device.mjpeg')}`
   ]
 })
-// app.get('/text', (req, res) => {
-//   let textContent = `${req.query.text}`
-//   // get the input box
-//   let inputBox = '#bfTqV'
-//   page.fill(inputBox, textContent)
-// });
-// app.listen(port)
+let lastChat = ''
 
-function getTheChatText() {
-
+function getTheChatText(page: Page) {
+  setInterval(() => {
+    fs.readFile(path.resolve('./resource/text.txt'), async (err, data) => {
+      if (err) throw err;
+      let textContent = `${data}`
+      // get the input box
+      let inputBox = '#bfTqV'
+      let clickButton = 'xpath=//html/body/div[1]/c-wiz/div[1]/div/div[10]/div[3]/div[4]/div[2]/div[2]/div/div[5]/span/button'
+      if (lastChat == textContent) {
+        return
+      } else {
+        lastChat = textContent
+        let handUpButton = 'xpath=//html/body/div[1]/c-wiz/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[3]/div/span/button'
+        let element = page.locator(handUpButton)
+        try {
+          if (textContent == '> HU') {
+            await expect(element).toHaveAttribute('aria-pressed', 'false')
+            element.click()
+          } else if(textContent == '> HD') {
+            await expect(element).toHaveAttribute('aria-pressed', 'true')
+            element.click()
+          }else{
+            await page.fill(inputBox, textContent)
+            await page.click(clickButton)
+          }
+        } catch (error) {
+          console.log('You already do that');
+        }
+      }
+    })
+  }, 10000)
 }
 
-async function joinTheRoom(code: string, long: string, page:any) {
-    // listen text request
-    await page.goto('https://accounts.google.com/');
-    // input the email
-    await page.fill('#identifierId', process.env.GOOGLE_EMAIL);
-    // click the next button
-    await page.click('xpath=//html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button');
-    console.log('enter email complete');
-    // check the password input box is defined
-    let passwordInputXpath = 'xpath=//input[@type="password"]';
-    await page.fill(passwordInputXpath, process.env.GOOGLE_PASSWORD);
-    // click the next button
-    await page.click('#passwordNext');
-    console.log('enter password complete');
-    await sleep(3000);
-    // go to google meet room
-    await page.goto('https://meet.google.com/' + code);
-    console.log('go to google meet complete');
-    // close the camera
-    await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[1]/div[1]/div/div[4]/div[2]')
-    // close the microphone
-    await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[1]/div[1]/div/div[4]/div[1]')
-    // join the room
-    await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[2]/div/div[2]/div/div[1]/div[1]/button')
-    console.log('join the room complete');
-    // leave the room
-    await sleep(Number(long) * 60 * 1000);
-    await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
-    console.log('leave the room');
+async function joinTheRoom(code: string, long: string, page: Page) {
+  // listen text request
+  await page.goto('https://accounts.google.com/');
+  // input the email
+  await page.fill('#identifierId', process.env.GOOGLE_EMAIL);
+  // click the next button
+  await page.click('xpath=//html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button');
+  console.log('enter email complete');
+  // check the password input box is defined
+  let passwordInputXpath = 'xpath=//input[@type="password"]';
+  await page.fill(passwordInputXpath, process.env.GOOGLE_PASSWORD);
+  // click the next button
+  await page.click('#passwordNext');
+  console.log('enter password complete');
+  await sleep(3000);
+  // go to google meet room
+  await page.goto('https://meet.google.com/' + code);
+  console.log('go to google meet complete');
+  // close the camera
+  await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[1]/div[1]/div/div[4]/div[2]')
+  // close the microphone
+  await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[1]/div[1]/div/div[4]/div[1]')
+  // join the room
+  await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[2]/div/div[2]/div/div[1]/div[1]/button')
+  console.log('join the room complete');
+  getTheChatText(page)
+  // leave the room
+  await sleep(Number(long) * 60 * 1000);
+  await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
+  console.log('leave the room');
 }
 
-function standBy(){
-  test('standBy', async ({ page, context })=>{
+function standBy() {
+  test('standBy', async ({ page, context }) => {
     context.grantPermissions(['camera', 'microphone']);
     // listen time up
     scheduleFile.map(item => {
@@ -65,9 +91,9 @@ function standBy(){
       })
     })
     await page.goto('https://google.com/');
-    await sleep(Number(process.env.OPEN_TIME) * 60 * 1000);
+    await sleep(Number(OPEN_TIME) * 60 * 1000);
     // go to error page
-    page.goto('https://meet.google.com/');
+    await page.goto('https://meet.google.com/');
   })
 }
 

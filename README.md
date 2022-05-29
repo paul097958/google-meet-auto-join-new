@@ -1,2 +1,3 @@
 # Google meet auto join
-you can use
+
+First of all you have to download the NODEJS to run your server
