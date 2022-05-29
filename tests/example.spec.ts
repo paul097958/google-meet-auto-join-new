@@ -32,13 +32,16 @@ function getTheChatText(page: Page) {
         try {
           if (textContent == '> HU') {
             await expect(element).toHaveAttribute('aria-pressed', 'false')
-            element.click()
+            await element.click()
+            console.log('Hands up');
           } else if(textContent == '> HD') {
             await expect(element).toHaveAttribute('aria-pressed', 'true')
-            element.click()
+            await element.click()
+            console.log('Hands down');
           }else{
             await page.fill(inputBox, textContent)
             await page.click(clickButton)
+            console.log('You send: ' + textContent);
           }
         } catch (error) {
           console.log('You already do that');
@@ -81,7 +84,7 @@ async function joinTheRoom(code: string, long: string, page: Page) {
 }
 
 function standBy() {
-  test('standBy', async ({ page, context }) => {
+  test('start joiner', async ({ page, context }) => {
     context.grantPermissions(['camera', 'microphone']);
     // listen time up
     scheduleFile.map(item => {

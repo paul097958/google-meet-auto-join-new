@@ -1,24 +1,13 @@
 [
     {
-        "name": "meeting name",
-        "code": " meeting code",
+        "name": "yyd-tfpd-bfq",
+        "code": "yyd-tfpd-bfq",
         "month": "5",
         "date": "30",
         "day": "1",
-        "hour": "8",
-        "minute": "20",
+        "hour": "0",
+        "minute": "44",
         "second": "0",
-        "long": "45"
-    },
-    {
-        "name": "meeting name",
-        "code": "meeting code",
-        "month": "5",
-        "date": "31",
-        "day": "2",
-        "hour": "8",
-        "minute": "23",
-        "second": "0",
-        "long": "100"
+        "long": "1"
     }
 ]
