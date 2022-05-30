@@ -4,6 +4,7 @@ import { test, chromium, expect } from '@playwright/test';
 import type { Page } from '@playwright/test'
 import schedule from 'node-schedule'
 import sleep from 'sleep-promise';
+import open from 'open';
 import scheduleFile from '../schedule.json';
 require('dotenv').config();
 const OPEN_TIME = Number(process.env.OPEN_TIME) || 480 * 60 * 1000
@@ -16,7 +17,7 @@ chromium.launch({
 let lastChat = ''
 let firstTime = false;
 
-function getTheChatText(page: Page) {
+function getTheChatText(page: Page, code: string) {
   setInterval(() => {
     fs.readFile(path.resolve('./resource/text.txt'), async (err, data) => {
       if (err) throw err;
@@ -39,6 +40,13 @@ function getTheChatText(page: Page) {
             await expect(element).toHaveAttribute('aria-pressed', 'true')
             await element.click()
             console.log('Hands down');
+          } else if (textContent == '> BY') {
+            await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
+            console.log('leave the room');
+          } else if (textContent == '> CM') {
+            await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
+            console.log('leave the room');
+            open('https://meet.google.com/' + code)
           } else {
             await page.fill(inputBox, textContent)
             await page.click(clickButton)
@@ -68,7 +76,7 @@ async function joinTheRoom(code: string, long: string, page: Page, firstTime: bo
     console.log('enter password complete');
     await sleep(3000);
   }
-  if(!firstTime){
+  if (!firstTime) {
     await Login();
   }
   // go to google meet room
@@ -84,7 +92,7 @@ async function joinTheRoom(code: string, long: string, page: Page, firstTime: bo
   // click the open chat box button
   await page.click('xpath=//html/body/div[1]/c-wiz/div[1]/div/div[10]/div[3]/div[10]/div[3]/div[3]/div/div/div[3]/span/button')
   console.log('open the chat box complete');
-  getTheChatText(page)
+  getTheChatText(page, code)
   // leave the room
   await sleep(Number(long) * 60 * 1000);
   await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
