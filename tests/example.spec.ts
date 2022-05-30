@@ -95,8 +95,13 @@ async function joinTheRoom(code: string, long: string, page: Page, firstTime: bo
   getTheChatText(page, code)
   // leave the room
   await sleep(Number(long) * 60 * 1000);
-  await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
-  console.log('leave the room');
+  try {
+    await page.click('xpath=//*[@id="ow3"]/div[1]/div/div[10]/div[3]/div[10]/div[2]/div/div[6]/span/button')
+    console.log('leave the room');
+  } catch (e) {
+    return
+  }
+
 }
 
 function standBy() {
