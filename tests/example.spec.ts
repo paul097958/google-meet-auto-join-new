@@ -6,7 +6,7 @@ import schedule from 'node-schedule'
 import sleep from 'sleep-promise';
 import scheduleFile from '../schedule.json';
 require('dotenv').config();
-const OPEN_TIME = Number(process.env.OPEN_TIME) || 480*60*1000
+const OPEN_TIME = Number(process.env.OPEN_TIME) || 480 * 60 * 1000
 chromium.launch({
   args: [
     "--use-fake-device-for-media-stream",
@@ -34,11 +34,11 @@ function getTheChatText(page: Page) {
             await expect(element).toHaveAttribute('aria-pressed', 'false')
             await element.click()
             console.log('Hands up');
-          } else if(textContent == '> HD') {
+          } else if (textContent == '> HD') {
             await expect(element).toHaveAttribute('aria-pressed', 'true')
             await element.click()
             console.log('Hands down');
-          }else{
+          } else {
             await page.fill(inputBox, textContent)
             await page.click(clickButton)
             console.log('You send: ' + textContent);
@@ -76,6 +76,9 @@ async function joinTheRoom(code: string, long: string, page: Page) {
   // join the room
   await page.click('xpath=//*[@id="yDmH0d"]/c-wiz/div/div/div[10]/div[3]/div/div[1]/div[4]/div/div/div[2]/div/div[2]/div/div[1]/div[1]/button')
   console.log('join the room complete');
+  // click the open chat box button
+  await page.click('xpath=//html/body/div[1]/c-wiz/div[1]/div/div[10]/div[3]/div[10]/div[3]/div[3]/div/div/div[3]/span/button')
+  console.log('open the chat box complete');
   getTheChatText(page)
   // leave the room
   await sleep(Number(long) * 60 * 1000);

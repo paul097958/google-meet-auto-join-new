@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "you can use",
   "main": "main.js",
-  "scripts": {},
+  "scripts": {
+    "join": "npx playwright test"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
