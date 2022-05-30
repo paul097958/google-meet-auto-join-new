@@ -14,6 +14,7 @@ chromium.launch({
   ]
 })
 let lastChat = ''
+let firstTime = false;
 
 function getTheChatText(page: Page) {
   setInterval(() => {
@@ -51,21 +52,25 @@ function getTheChatText(page: Page) {
   }, 10000)
 }
 
-async function joinTheRoom(code: string, long: string, page: Page) {
-  // listen text request
-  await page.goto('https://accounts.google.com/');
-  // input the email
-  await page.fill('#identifierId', process.env.GOOGLE_EMAIL);
-  // click the next button
-  await page.click('xpath=//html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button');
-  console.log('enter email complete');
-  // check the password input box is defined
-  let passwordInputXpath = 'xpath=//input[@type="password"]';
-  await page.fill(passwordInputXpath, process.env.GOOGLE_PASSWORD);
-  // click the next button
-  await page.click('#passwordNext');
-  console.log('enter password complete');
-  await sleep(3000);
+async function joinTheRoom(code: string, long: string, page: Page, firstTime: boolean) {
+  async function Login() {
+    await page.goto('https://accounts.google.com/');
+    // input the email
+    await page.fill('#identifierId', process.env.GOOGLE_EMAIL);
+    // click the next button
+    await page.click('xpath=//html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button');
+    console.log('enter email complete');
+    // check the password input box is defined
+    let passwordInputXpath = 'xpath=//input[@type="password"]';
+    await page.fill(passwordInputXpath, process.env.GOOGLE_PASSWORD);
+    // click the next button
+    await page.click('#passwordNext');
+    console.log('enter password complete');
+    await sleep(3000);
+  }
+  if(!firstTime){
+    await Login();
+  }
   // go to google meet room
   await page.goto('https://meet.google.com/' + code);
   console.log('go to google meet complete');
@@ -92,8 +97,10 @@ function standBy() {
     // listen time up
     scheduleFile.map(item => {
       let scheduleTimeFormat = `${item.second} ${item.minute} ${item.hour} ${item.date} ${item.month} ${item.day}`
+      console.log(scheduleTimeFormat);
       schedule.scheduleJob(scheduleTimeFormat, async () => {
-        joinTheRoom(item.code, item.long, page)
+        joinTheRoom(item.code, item.long, page, firstTime)
+        firstTime = true;
       })
     })
     await page.goto('https://google.com/');
